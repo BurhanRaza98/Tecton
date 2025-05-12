@@ -7,9 +7,21 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
+
+// Add this to configure the app icon at startup
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // App configuration
+        return true
+    }
+}
 
 @main
 struct TectonApp: App {
+    // Register the app delegate
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +37,7 @@ struct TectonApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashScreen()
         }
         .modelContainer(sharedModelContainer)
     }

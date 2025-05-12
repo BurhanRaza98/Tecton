@@ -1,0 +1,296 @@
+import Foundation
+import SwiftUI
+
+// Import ProgressManager
+// Since VolcanoProgressInfo might be in a separate module or part of the app's main module
+// we don't explicitly import it, it should be available to us
+
+// Achievement badge model
+struct Achievement: Identifiable, Equatable {
+    let id = UUID()
+    let title: String
+    let description: String
+    let volcanoName: String
+    let badgeIcon: String
+    let badgeColor: Color
+    let requiredGames: Int
+    
+    static func == (lhs: Achievement, rhs: Achievement) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+// Color Extension for hex colors
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(.sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255, opacity: Double(a) / 255)
+    }
+}
+
+// Achievement level for a volcano
+enum AchievementLevel: Int, CaseIterable {
+    case bronze = 1
+    case silver = 2
+    case gold = 3
+    
+    var name: String {
+        switch self {
+        case .bronze: return "Bronze"
+        case .silver: return "Silver"
+        case .gold: return "Gold"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .bronze: return "medal.fill"
+        case .silver: return "medal.fill"
+        case .gold: return "medal.fill"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .bronze: return Color(hex: "#CD7F32")
+        case .silver: return Color(hex: "#C0C0C0")
+        case .gold: return Color(hex: "#FFD700")
+        }
+    }
+}
+
+// Badge image size
+enum BadgeSize {
+    case small
+    case medium
+    case large
+    
+    var dimension: CGFloat {
+        switch self {
+        case .small: return 30
+        case .medium: return 60
+        case .large: return 90
+        }
+    }
+}
+
+// Achievement manager
+class AchievementManager: ObservableObject {
+    static let shared = AchievementManager()
+    
+    @Published var achievements: [Achievement] = []
+    @Published var newlyEarnedAchievement: Achievement? = nil
+    
+    // Track which achievements have been shown in notifications
+    private var notifiedAchievements: Set<UUID> = []
+    
+    // Achievement definitions
+    let vesuviusAchievements = [
+        Achievement(
+            title: "Vesuvius Novice",
+            description: "Complete 1 mini-game for Mount Vesuvius",
+            volcanoName: "Mount Vesuvius",
+            badgeIcon: "mountain.2.fill",
+            badgeColor: AchievementLevel.bronze.color,
+            requiredGames: 1
+        ),
+        Achievement(
+            title: "Vesuvius Explorer",
+            description: "Complete 2 mini-games for Mount Vesuvius",
+            volcanoName: "Mount Vesuvius",
+            badgeIcon: "mountain.2.fill",
+            badgeColor: AchievementLevel.silver.color,
+            requiredGames: 2
+        ),
+        Achievement(
+            title: "Vesuvius Master",
+            description: "Complete all mini-games for Mount Vesuvius",
+            volcanoName: "Mount Vesuvius",
+            badgeIcon: "mountain.2.fill",
+            badgeColor: AchievementLevel.gold.color,
+            requiredGames: 3
+        )
+    ]
+    
+    let stHelensAchievements = [
+        Achievement(
+            title: "St. Helens Novice",
+            description: "Complete 1 mini-game for Mount St. Helens",
+            volcanoName: "Mount St. Helens",
+            badgeIcon: "flame.fill",
+            badgeColor: AchievementLevel.bronze.color,
+            requiredGames: 1
+        ),
+        Achievement(
+            title: "St. Helens Explorer",
+            description: "Complete 2 mini-games for Mount St. Helens",
+            volcanoName: "Mount St. Helens",
+            badgeIcon: "flame.fill",
+            badgeColor: AchievementLevel.silver.color,
+            requiredGames: 2
+        ),
+        Achievement(
+            title: "St. Helens Master",
+            description: "Complete all mini-games for Mount St. Helens",
+            volcanoName: "Mount St. Helens",
+            badgeIcon: "flame.fill",
+            badgeColor: AchievementLevel.gold.color,
+            requiredGames: 3
+        )
+    ]
+    
+    let fujiAchievements = [
+        Achievement(
+            title: "Fuji Novice",
+            description: "Complete 1 mini-game for Mount Fuji",
+            volcanoName: "Mount Fuji",
+            badgeIcon: "snowflake",
+            badgeColor: AchievementLevel.bronze.color,
+            requiredGames: 1
+        ),
+        Achievement(
+            title: "Fuji Explorer",
+            description: "Complete 2 mini-games for Mount Fuji",
+            volcanoName: "Mount Fuji",
+            badgeIcon: "snowflake",
+            badgeColor: AchievementLevel.silver.color,
+            requiredGames: 2
+        ),
+        Achievement(
+            title: "Fuji Master",
+            description: "Complete all mini-games for Mount Fuji",
+            volcanoName: "Mount Fuji",
+            badgeIcon: "snowflake",
+            badgeColor: AchievementLevel.gold.color,
+            requiredGames: 3
+        )
+    ]
+    
+    // Special achievements
+    let specialAchievements = [
+        Achievement(
+            title: "Volcano Expert",
+            description: "Complete all mini-games for all volcanoes",
+            volcanoName: "All Volcanoes",
+            badgeIcon: "star.fill",
+            badgeColor: Color(hex: "#FFD700"),
+            requiredGames: 9
+        )
+    ]
+    
+    private init() {
+        // Combine all achievement definitions
+        achievements = vesuviusAchievements + stHelensAchievements + fujiAchievements + specialAchievements
+    }
+    
+    // Get earned achievements based on current progress
+    func getEarnedAchievements() -> [Achievement] {
+        var earned: [Achievement] = []
+        
+        // Count completed games for each volcano
+        let vesuviusCompleted = countCompletedGames(for: "Mount Vesuvius")
+        let stHelensCompleted = countCompletedGames(for: "Mount St. Helens")
+        let fujiCompleted = countCompletedGames(for: "Mount Fuji")
+        
+        // Check Vesuvius achievements
+        for achievement in vesuviusAchievements {
+            if vesuviusCompleted >= achievement.requiredGames {
+                earned.append(achievement)
+            }
+        }
+        
+        // Check St. Helens achievements
+        for achievement in stHelensAchievements {
+            if stHelensCompleted >= achievement.requiredGames {
+                earned.append(achievement)
+            }
+        }
+        
+        // Check Fuji achievements
+        for achievement in fujiAchievements {
+            if fujiCompleted >= achievement.requiredGames {
+                earned.append(achievement)
+            }
+        }
+        
+        // Check special achievements
+        let totalCompleted = vesuviusCompleted + stHelensCompleted + fujiCompleted
+        for achievement in specialAchievements {
+            if totalCompleted >= achievement.requiredGames {
+                earned.append(achievement)
+            }
+        }
+        
+        return earned
+    }
+    
+    // Count completed games for a specific volcano
+    private func countCompletedGames(for volcanoName: String) -> Int {
+        let progressManager = ProgressManager.shared
+        
+        if let volcano = progressManager.volcanoLevels.first(where: { $0.name == volcanoName }) {
+            return volcano.games.filter { $0.isCompleted }.count
+        }
+        
+        return 0
+    }
+    
+    // Check if a specific achievement is earned
+    func isAchievementEarned(_ achievement: Achievement) -> Bool {
+        return getEarnedAchievements().contains(where: { $0.id == achievement.id })
+    }
+    
+    // Get achievement progress for a specific volcano (0-3 games completed)
+    func getAchievementProgress(for volcanoName: String) -> Int {
+        return countCompletedGames(for: volcanoName)
+    }
+    
+    // Get the total achievement progress percentage across all volcanoes
+    func getTotalProgressPercentage() -> Double {
+        let progressManager = ProgressManager.shared
+        let totalGames = progressManager.volcanoLevels.reduce(0) { $0 + $1.games.count }
+        let completedGames = progressManager.volcanoLevels.reduce(0) { $0 + $1.games.filter { $0.isCompleted }.count }
+        
+        guard totalGames > 0 else { return 0 }
+        return Double(completedGames) / Double(totalGames)
+    }
+    
+    // Check for newly earned achievements
+    func checkForNewAchievements() {
+        // Check each achievement
+        for achievement in achievements {
+            let isEarned = isAchievementEarned(achievement)
+            
+            // If this is newly earned and not yet notified
+            if isEarned && !notifiedAchievements.contains(achievement.id) {
+                // Mark as notified
+                notifiedAchievements.insert(achievement.id)
+                
+                // Update UI with newly earned achievement
+                DispatchQueue.main.async {
+                    self.newlyEarnedAchievement = achievement
+                }
+                
+                // Save notification status to UserDefaults
+                let notifiedStrings = notifiedAchievements.map { $0.uuidString }
+                UserDefaults.standard.set(notifiedStrings, forKey: "notifiedAchievements")
+                
+                // Only notify about one achievement at a time
+                break
+            }
+        }
+    }
+} 

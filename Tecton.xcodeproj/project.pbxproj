@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		03BED3B52DCFF76C006677DD /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 03BED3B42DCFF76C006677DD /* Lottie */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		03BED35D2DCCF32D006677DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03BED3B52DCFF76C006677DD /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = Tecton;
 			packageProductDependencies = (
+				03BED3B42DCFF76C006677DD /* Lottie */,
 			);
 			productName = Tecton;
 			productReference = 03BED34D2DCCF32B006677DD /* Tecton.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 03BED3442DCCF32B006677DD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				03BED3B32DCFF76C006677DD /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 03BED34E2DCCF32B006677DD /* Products */;
 			projectDirPath = "";
@@ -558,6 +567,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		03BED3B32DCFF76C006677DD /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		03BED3B42DCFF76C006677DD /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03BED3B32DCFF76C006677DD /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 03BED3452DCCF32B006677DD /* Project object */;
 }
