@@ -121,48 +121,26 @@ struct DashboardView: View {
             .frame(width: 110, height: 110)
         }
     }
-
+    
     var body: some View {
         GeometryReader { geometry in
             NavigationStack(path: $navigationPath) {
                 ZStack {
-                    // Background image - positioned as the bottom layer
-                    Image("Background river")
-                        .resizable()
-                        .scaledToFill()
-                        .edgesIgnoringSafeArea(.all)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-            
-                    VStack{
-                        // Fixed achievements button (on top)
-                        VStack {
-                            HStack {
-                                Spacer()
-                                Button(action: {
-                                    navigationPath.append(NavigationDestination.achievements)
-                                }) {
-                                    Image(systemName: "trophy.fill")
-                                        .font(.system(size: 34))
-                                        .foregroundColor(Color.orange)
-                                        .padding(12)
-                                        .background(
-                                            Circle()
-                                                .fill(Color.white.opacity(0.1))
-                                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                                        )
-                                }
-                                .padding(.trailing, 20)
-                            }
-                            
-                        }
-                        
-                        // Scrollable content
-                        ScrollView {
-
-                            GreetingCardView()
+                    // Scrollable content
+                    ScrollView {
+                        ZStack(alignment: .top) {
+                            // Background image - now inside ScrollView to scroll with content
+                            Image("Background river")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geometry.size.width)
+                                .frame(minHeight: geometry.size.height)
                             
                             VStack(spacing: 0) {
-                   
+                                GreetingCardView()
+                                    .padding(.top, 35)
+                                    .padding(.horizontal, 20)
+                                
                                 VStack(spacing: 30) {
                                     ForEach(progressManager.volcanoLevels) { volcano in
                                         VStack(spacing: 15) {
@@ -181,7 +159,7 @@ struct DashboardView: View {
                                             .padding(.horizontal)
                                         }
                                         .padding(.vertical, 20)
-                                        
+                                                                            
                                         // Don't show connector line after the last volcano
                                         if volcano.order < progressManager.volcanoLevels.count {
                                             ConnectorLine()
@@ -225,10 +203,12 @@ struct DashboardView: View {
                     }
                 }
             }
+            .edgesIgnoringSafeArea(.all)
         }
         .edgesIgnoringSafeArea(.all)
         .statusBar(hidden: true)
     }
+}
 }
 
 struct GreetingCardView: View {
