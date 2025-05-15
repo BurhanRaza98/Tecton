@@ -120,82 +120,83 @@ struct DashboardView: View {
             .frame(width: 110, height: 110)
         }
     }
-
+    
     var body: some View {
         GeometryReader { geometry in
             NavigationStack(path: $navigationPath) {
                 ZStack {
-                    // Background image - positioned as the bottom layer
-                    Image("Background river")
-                        .resizable()
-                        .scaledToFill()
-                        .edgesIgnoringSafeArea(.all)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                    
                     // Scrollable content
                     ScrollView {
-                        VStack(spacing: 0) {
-                            GreetingCardView()
-                                .padding(.top, 35)
-                                .padding(.horizontal, 20)
+                        ZStack(alignment: .top) {
+                            // Background image - now inside ScrollView to scroll with content
+                            Image("Background river")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geometry.size.width)
+                                .frame(minHeight: geometry.size.height)
                             
-                            VStack(spacing: 30) {
-                                ForEach(progressManager.volcanoLevels) { volcano in
-                                    VStack(spacing: 15) {
-                                        // Volcano header with name
-                                        VolcanoHeaderView(volcano: volcano)
-                                        
-                                        // Display game nodes for each volcano
-                                        HStack(spacing: 20) {
-                                            ForEach(volcano.games) { game in
-                                                GameNodeView(game: game, isEnabled: volcano.isUnlocked, volcanoName: volcano.name) { destination in
-                                                    navigationPath.append(destination)
+                            VStack(spacing: 0) {
+                                GreetingCardView()
+                                    .padding(.top, 35)
+                                    .padding(.horizontal, 20)
+                                
+                                VStack(spacing: 30) {
+                                    ForEach(progressManager.volcanoLevels) { volcano in
+                                        VStack(spacing: 15) {
+                                            // Volcano header with name
+                                            VolcanoHeaderView(volcano: volcano)
+                                            
+                                            // Display game nodes for each volcano
+                                            HStack(spacing: 20) {
+                                                ForEach(volcano.games) { game in
+                                                    GameNodeView(game: game, isEnabled: volcano.isUnlocked, volcanoName: volcano.name) { destination in
+                                                        navigationPath.append(destination)
+                                                    }
                                                 }
                                             }
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.horizontal)
                                         }
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.horizontal)
-                                    }
-                                    .padding(.vertical, 20)
-                                    
-                                    // Don't show connector line after the last volcano
-                                    if volcano.order < progressManager.volcanoLevels.count {
-                                        ConnectorLine()
-                                            .frame(height: 60)
+                                        .padding(.vertical, 20)
+                                        // Don't show connector line after the last volcano
+                                        if volcano.order < progressManager.volcanoLevels.count {
+                                            ConnectorLine()
+                                                .frame(height: 60)
+                                        }
                                     }
                                 }
+                                .padding(.top, 20)
+                                .padding(.bottom, 80)
                             }
-                            .padding(.top, 20)
-                            .padding(.bottom, 80)
+                            .padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 20)
                     }
-                }
-                .navigationBarHidden(true)
-                .navigationDestination(for: NavigationDestination.self) { destination in
-                    switch destination {
-                    case .quiz(let volcano):
-                        QuizView(volcano: volcano)
-                    case .match(let volcano):
-                        MatchView(volcano: volcano)
-                    case .puzzle(let volcano):
-                        PuzzleView(volcano: volcano)
-                    case .volcanoBuilder(let volcano):
-                        if volcano == "Mount Vesuvius" {
-                            VolcanoBuilderView()
-                        } else if volcano == "Mount St. Helens" {
-                            StHelensBuilderView()
-                        } else if volcano == "Mount Fuji" {
-                            FujiBuilderView()
-                        } else {
-                            // Default to Vesuvius if volcano not supported
-                            VolcanoBuilderView()
+                    .navigationBarHidden(true)
+                    .navigationDestination(for: NavigationDestination.self) { destination in
+                        switch destination {
+                        case .quiz(let volcano):
+                            QuizView(volcano: volcano)
+                        case .match(let volcano):
+                            MatchView(volcano: volcano)
+                        case .puzzle(let volcano):
+                            PuzzleView(volcano: volcano)
+                        case .volcanoBuilder(let volcano):
+                            if volcano == "Mount Vesuvius" {
+                                VolcanoBuilderView()
+                            } else if volcano == "Mount St. Helens" {
+                                StHelensBuilderView()
+                            } else if volcano == "Mount Fuji" {
+                                FujiBuilderView()
+                            } else {
+                                // Default to Vesuvius if volcano not supported
+                                VolcanoBuilderView()
+                            }
                         }
                     }
                 }
             }
+            .edgesIgnoringSafeArea(.all)
         }
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
