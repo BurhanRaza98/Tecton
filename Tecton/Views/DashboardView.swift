@@ -109,11 +109,6 @@ struct DashboardView: View {
         
         var body: some View {
             ZStack {
-                // Debug outline to help see the view boundaries
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.red, lineWidth: 1)
-                    .frame(width: 110, height: 110)
-                
                 // Use our SwiftUI animation instead
                 SwiftUIVolcanoAnimation(volcanoName: volcanoName)
                     .frame(width: 110, height: 110)
@@ -282,54 +277,9 @@ struct VolcanoHeaderView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            // Use a specific image for each volcano
-            if volcano.name == "Mount Vesuvius" {
-                ZStack {
-                    Image("visit Mount Vesuvius")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white, lineWidth: 2)
-                        )
-                }
+         
+            DashboardView.VolcanoLottieView(volcanoName: volcano.name)
                 .frame(width: 100, height: 100)
-            }
-            else if volcano.name == "Mount St. Helens" {
-                ZStack {
-                    Image("St Helens")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white, lineWidth: 2)
-                        )
-                }
-                .frame(width: 100, height: 100)
-            }
-            else if volcano.name == "Mount Fuji" {
-                ZStack {
-                    Image("Mount fuji pic")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white, lineWidth: 2)
-                        )
-                }
-                .frame(width: 100, height: 100)
-            }
-            // Fallback to the animation as backup
-            else {
-                DashboardView.VolcanoLottieView(volcanoName: volcano.name)
-                    .frame(width: 100, height: 100)
-            }
             
             Text(volcano.name)
                 .font(.custom("SF Pro Text", size: 18).weight(.semibold))
