@@ -4,6 +4,9 @@ import Lottie
 // import LottieSwiftUI
 // import LottieAnimation
 
+
+// c:
+
 // Define navigation destinations
 enum NavigationDestination: Hashable {
     case quiz(String)
