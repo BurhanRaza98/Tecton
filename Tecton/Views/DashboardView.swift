@@ -123,109 +123,119 @@ struct DashboardView: View {
     var body: some View {
         GeometryReader { geometry in
             NavigationStack(path: $navigationPath) {
-                ZStack {
-                    // Background image - positioned as the bottom layer
-                    Image("Background river")
-                        .resizable()
-                        .scaledToFill()
+                ZStack(alignment: .top) {
+                    // Background color
+                    Color.black
                         .edgesIgnoringSafeArea(.all)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-            
-                    VStack{
-                        // Fixed achievements button (on top)
-                        VStack {
-                            HStack {
-                                Spacer()
-                                Button(action: {
-                                    navigationPath.append(NavigationDestination.achievements)
-                                }) {
-                                    Image(systemName: "trophy.fill")
-                                        .font(.system(size: 34))
-                                        .foregroundColor(Color.orange)
-                                        .padding(12)
-                                        .background(
-                                            Circle()
-                                                .fill(Color.white.opacity(0.1))
-                                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                                        )
-                                }
-                                .padding(.trailing, 20)
-                            }
+                    
+                    ScrollView {
+                        ZStack(alignment: .top) {
+                            // Scrollable background
+                            Image("New_Background")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geometry.size.width)
+                                .frame(minHeight: geometry.size.height * 1.2) // Make the image 20% taller
+                                .offset(y: -geometry.safeAreaInsets.top - 20) // Move up to cover the top area
                             
-                        }
-                        
-                        // Scrollable content
-                        ScrollView {
-
-                            GreetingCardView()
-                            
-                            VStack(spacing: 0) {
-                   
-                                VStack(spacing: 30) {
-                                    ForEach(progressManager.volcanoLevels) { volcano in
-                                        VStack(spacing: 15) {
-                                            // Volcano header with name
-                                            VolcanoHeaderView(volcano: volcano)
-                                            
-                                            // Display game nodes for each volcano
-                                            HStack(spacing: 20) {
-                                                ForEach(volcano.games) { game in
-                                                    GameNodeView(game: game, isEnabled: volcano.isUnlocked, volcanoName: volcano.name) { destination in
-                                                        navigationPath.append(destination)
-                                                    }
-                                                }
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.horizontal)
+                            // Content
+                            VStack(spacing: 20) {
+                                // Fixed achievements button (on top)
+                                VStack {
+                                    HStack {
+                                        Spacer()
+                                        Button(action: {
+                                            navigationPath.append(NavigationDestination.achievements)
+                                        }) {
+                                            Image(systemName: "trophy.fill")
+                                                .font(.system(size: 34))
+                                                .foregroundColor(Color.orange)
+                                                .padding(12)
+                                                .background(
+                                                    Circle()
+                                                        .fill(Color.white.opacity(0.1))
+                                                        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                                )
                                         }
-                                        .padding(.vertical, 20)
-                                        
-                                        // Don't show connector line after the last volcano
-                                        if volcano.order < progressManager.volcanoLevels.count {
-                                            ConnectorLine()
-                                                .frame(height: 60)
-                                        }
+                                        .padding(.trailing, 20)
                                     }
                                 }
-                                .padding(.top, 20)
-                                .padding(.bottom, 80)
+                                
+                                // Scrollable content
+                                ScrollView {
+
+                                    GreetingCardView()
+                                    
+                                    VStack(spacing: 0) {
+                           
+                                        VStack(spacing: 30) {
+                                            ForEach(progressManager.volcanoLevels) { volcano in
+                                                VStack(spacing: 15) {
+                                                    // Volcano header with name
+                                                    VolcanoHeaderView(volcano: volcano)
+                                                    
+                                                    // Display game nodes for each volcano
+                                                    HStack(spacing: 20) {
+                                                        ForEach(volcano.games) { game in
+                                                            GameNodeView(game: game, isEnabled: volcano.isUnlocked, volcanoName: volcano.name) { destination in
+                                                                navigationPath.append(destination)
+                                                            }
+                                                        }
+                                                    }
+                                                    .frame(maxWidth: .infinity)
+                                                    .padding(.horizontal)
+                                                }
+                                                .padding(.vertical, 20)
+                                                
+                                                // Don't show connector line after the last volcano
+                                                if volcano.order < progressManager.volcanoLevels.count {
+                                                    ConnectorLine()
+                                                        .frame(height: 60)
+                                                }
+                                            }
+                                        }
+                                        .padding(.top, 20)
+                                        .padding(.bottom, 80)
+                                    }
+                                    .padding(.horizontal, 20)
+                                }
+                                
                             }
-                            .padding(.horizontal, 20)
-                        }
-                        
-                    }
           
-                    
-                
-                }
-                .navigationBarHidden(true)
-                .navigationDestination(for: NavigationDestination.self) { destination in
-                    switch destination {
-                    case .quiz(let volcano):
-                        QuizView(volcano: volcano)
-                    case .match(let volcano):
-                        MatchView(volcano: volcano)
-                    case .puzzle(let volcano):
-                        PuzzleView(volcano: volcano)
-                    case .volcanoBuilder(let volcano):
-                        if volcano == "Mount Vesuvius" {
-                            VolcanoBuilderView()
-                        } else if volcano == "Mount St. Helens" {
-                            StHelensBuilderView()
-                        } else if volcano == "Mount Fuji" {
-                            FujiBuilderView()
-                        } else {
-                            // Default to Vesuvius if volcano not supported
-                            VolcanoBuilderView()
+                            
+                        
                         }
-                    case .achievements:
-                        AchievementsView()
+                        .navigationBarHidden(true)
+                        .navigationDestination(for: NavigationDestination.self) { destination in
+                            switch destination {
+                            case .quiz(let volcano):
+                                QuizView(volcano: volcano)
+                            case .match(let volcano):
+                                MatchView(volcano: volcano)
+                            case .puzzle(let volcano):
+                                PuzzleView(volcano: volcano)
+                            case .volcanoBuilder(let volcano):
+                                if volcano == "Mount Vesuvius" {
+                                    VolcanoBuilderView()
+                                } else if volcano == "Mount St. Helens" {
+                                    StHelensBuilderView()
+                                } else if volcano == "Mount Fuji" {
+                                    FujiBuilderView()
+                                } else {
+                                    // Default to Vesuvius if volcano not supported
+                                    VolcanoBuilderView()
+                                }
+                            case .achievements:
+                                AchievementsView()
+                            }
+                        }
                     }
                 }
             }
         }
         .edgesIgnoringSafeArea(.all)
         .statusBar(hidden: true)
+        .background(Color.black) // Backup color
     }
 }
 
