@@ -125,8 +125,12 @@ struct DashboardView: View {
             NavigationStack(path: $navigationPath) {
                 ZStack(alignment: .top) {
                     // Background color
-                    Color.black
-                        .edgesIgnoringSafeArea(.all)
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color(hex: "#C9AB39"), Color(hex: "#E76F51")]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .edgesIgnoringSafeArea(.all)
                     
                     ScrollView {
                         ZStack(alignment: .top) {
