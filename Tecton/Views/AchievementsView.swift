@@ -3,6 +3,8 @@ import SwiftUI
 struct AchievementsView: View {
     @ObservedObject private var achievementManager = AchievementManager.shared
     @State private var selectedCategory: AchievementCategory = .all
+    @State private var scrollOffset: CGFloat = 0
+    @Environment(\.dismiss) private var dismiss
     
     // Achievement categories
     enum AchievementCategory: String, CaseIterable {
@@ -25,13 +27,45 @@ struct AchievementsView: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 0) {
-                // Header (fixed)
-                Text("Achievements")
-                    .font(.custom("SF Pro Rounded", size: 34).weight(.bold))
-                    .foregroundColor(Color(hex: "#1D3557"))
-                    .padding(.top, 20)
+                // Fixed header with X button
                 
-                // Make everything else scrollable
+                Spacer(minLength: 60)
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color(hex: "#1D3557"))
+                            .padding(12)
+                            .background(
+                                Circle()
+                                    .fill(Color.white.opacity(0.9))
+                                    .shadow(color: Color.black.opacity(0.1), radius: 4, y: 2)
+                            )
+                    }
+                    .padding(.leading, 20)
+                    
+                    Spacer()
+                    
+                    Text("Achievements")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color(hex: "#1D3557"))
+                    
+                    Spacer()
+                    
+                    // Empty view to balance the X button
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 44, height: 44)
+                        .padding(.trailing, 20)
+                    
+                }
+                .padding(.top, 40)
+                .padding(.bottom, 16)
+                
+                // Make content scrollable
                 ScrollView {
                     VStack(spacing: 0) {
                         // Progress circle
@@ -59,6 +93,7 @@ struct AchievementsView: View {
                 }
             }
         }
+        .navigationBarHidden(true)
     }
     
     // Category picker for filtering achievements
@@ -104,6 +139,14 @@ struct AchievementsView: View {
         case .fuji:
             return achievementManager.fujiAchievements
         }
+    }
+}
+
+// Preference key for tracking scroll offset
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 

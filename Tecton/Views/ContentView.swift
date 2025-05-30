@@ -60,46 +60,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        ZStack {
-            TabView(selection: $selectedTab) {
-                DashboardView()
-                    .tabItem {
-                        Image("Dashboard")
-                            .renderingMode(.template) // Makes the image use the accent color
-                        Text("Dashboard")
-                    }
-                    .tag(0)
-                
-                AchievementsView()
-                    .tabItem {
-                        Image("Achievements")
-                            // Removed template rendering to use the original icon
-                        Text("Achievements")
-                    }
-                    .tag(1)
-            }
-            // Remove the accent color since we're now setting colors explicitly in UIAppearance
-            // .accentColor(Color(hex: "#F4A261"))
-            .onAppear {
-                // Set up notification observer to switch to the Achievements tab
-                NotificationCenter.default.addObserver(forName: NSNotification.Name("SwitchToAchievementsTab"), object: nil, queue: .main) { _ in
-                    withAnimation {
-                        selectedTab = 1 // Switch to Achievements tab
-                    }
-                }
-            }
-            
-            // Achievement popup notification
-            if achievementManager.newlyEarnedAchievement != nil {
-                AchievementNotificationView(
-                    achievement: achievementManager.newlyEarnedAchievement!,
-                    isShowing: Binding<Bool>(
-                        get: { achievementManager.newlyEarnedAchievement != nil },
-                        set: { if !$0 { achievementManager.newlyEarnedAchievement = nil } }
-                    )
-                )
-            }
-        }
+        DashboardView()
     }
 }
 
