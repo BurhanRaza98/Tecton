@@ -71,9 +71,10 @@ struct VolcanoMatch {
                     pow(dragPosition.y - zone.coordinates.y, 2)
                 )
                 
-                // If distance is within a reasonable threshold,
-                // consider it a match - reduced from 50 to 40 for more precision
-                let matchThreshold: CGFloat = 40.0
+                // Use the zone size to determine a more accurate match threshold
+                // This makes the detection area proportional to the zone size
+                let matchThreshold: CGFloat = min(zone.size.width, zone.size.height) / 2
+                
                 if distance < matchThreshold {
                     return index
                 }

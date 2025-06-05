@@ -3,18 +3,15 @@ import SwiftUI
 struct MatchView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var match: VolcanoMatch = VolcanoMatch.vesuviusSample
-    @State private var draggingItem: Int? = nil
-    @State private var dragOffset = CGSize.zero
+    @State private var selectedItem: Int? = nil
     @State private var showFeedback = false
     @State private var feedbackText = ""
     @State private var isCorrectMatch = false
     @State private var showResults = false
-    @State private var dragItemPosition = CGPoint.zero
-    @State private var isHoveringOverMatch = false
+    @State private var highlightedZone: Int? = nil
     
     // Animation states
     @State private var bounceAnimation = false
-    @State private var showBounceHint = false
     
     init(volcano: String) {
         // Load the appropriate match game based on the volcano name
@@ -53,37 +50,41 @@ struct MatchView: View {
                                 .foregroundColor(Color(hex: "#1D3557"))
                                 .padding(.vertical, 10)
                             
-                            // Volcano diagram with drop zones
+                            // Instructions
+                            Text(selectedItem == nil ? 
+                                 "First, select a label below" : 
+                                 "Now, tap on the correct location on the volcano")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(hex: "#1D3557"))
+                                .padding(.bottom, 5)
+                            
+                            // Volcano diagram with clickable zones
                             VolcanoDiagramView(
                                 match: match,
-                                draggedItemPosition: draggingItem != nil ? dragItemPosition : nil
+                                highlightedZone: highlightedZone,
+                                onZoneTapped: { zoneIndex in
+                                    if let itemIndex = selectedItem {
+                                        handleMatchAttempt(itemIndex: itemIndex, zoneIndex: zoneIndex)
+                                    }
+                                }
                             )
                             .frame(height: 300)
                             .padding(.horizontal)
                             
-                            // Draggable labels at the bottom
+                            // Clickable labels at the bottom
                             VStack(spacing: 15) {
-                                Text("Drag labels to the correct location")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(Color(hex: "#1D3557"))
-                                    .padding(.bottom, 5)
-                                
-                                // Grid of draggable labels
+                                // Grid of clickable labels
                                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                                     ForEach(match.items.indices, id: \.self) { index in
-                                        DraggableLabelView(
-                                            item: match.items[index],
-                                            isDragging: draggingItem == index,
-                                            isHoveringOverMatch: draggingItem == index && isHoveringOverMatch,
-                                            dragOffset: draggingItem == index ? dragOffset : .zero,
-                                            onDragChanged: { offset in
-                                                handleDrag(index: index, offset: offset, in: geometry)
-                                            },
-                                            onDragEnded: { offset in
-                                                handleDragEnd(index: index, offset: offset, in: geometry)
-                                            }
-                                        )
-                                        .opacity(match.items[index].isMatched ? 0 : 1)
+                                        if !match.items[index].isMatched {
+                                            ClickableLabelView(
+                                                item: match.items[index],
+                                                isSelected: selectedItem == index,
+                                                onTap: {
+                                                    selectItem(index)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                                 .padding(.horizontal)
@@ -128,106 +129,77 @@ struct MatchView: View {
         .navigationBarHidden(true)
     }
     
-    // Update the position of the dragged item
-    private func handleDrag(index: Int, offset: CGSize, in geometry: GeometryProxy) {
-        // Calculate position for collision detection
-        let item = match.items[index]
-        let basePosition = item.originalPosition
-        let absolutePosition = CGPoint(
-            x: basePosition.x + offset.width,
-            y: basePosition.y + offset.height
-        )
-        
-        dragItemPosition = absolutePosition
-        draggingItem = index
-        dragOffset = offset
-        
-        // Scale factor for coordinates
-        let scale = min(geometry.size.width / 400, geometry.size.height / 400)
-        
-        // Check if hovering over matching zone
-        let scaledPosition = CGPoint(
-            x: (basePosition.x + offset.width) / scale,
-            y: (basePosition.y + offset.height) / scale
-        )
-        
-        // Use the match model to check if we're hovering over the correct zone
-        let isHovering = match.checkMatch(itemIndex: index, dragPosition: scaledPosition) != nil
-        withAnimation(.easeInOut(duration: 0.2)) {
-            isHoveringOverMatch = isHovering
-        }
-        
-        // Hide any showing feedback while dragging
-        if showFeedback {
-            showFeedback = false
+    // Select an item
+    private func selectItem(_ index: Int) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            // Toggle selection
+            if selectedItem == index {
+                selectedItem = nil
+                highlightedZone = nil
+            } else {
+                selectedItem = index
+                
+                // No longer automatically highlight the correct zone
+                // Just set highlightedZone to nil
+                highlightedZone = nil
+            }
+            
+            // Hide any showing feedback
+            if showFeedback {
+                showFeedback = false
+            }
         }
     }
     
-    // Handle when the user stops dragging an item
-    private func handleDragEnd(index: Int, offset: CGSize, in geometry: GeometryProxy) {
-        // Calculate final position
-        let item = match.items[index]
-        let basePosition = item.originalPosition
+    // Handle match attempt
+    private func handleMatchAttempt(itemIndex: Int, zoneIndex: Int) {
+        // Check if the zone is already matched
+        if match.zones[zoneIndex].isMatched {
+            // Already matched - show feedback
+            feedbackText = "This location already has a label."
+            isCorrectMatch = false
+            withAnimation {
+                showFeedback = true
+            }
+            return
+        }
         
-        // Scale factor for adapted coordinates (similarly to what we do in VolcanoDiagramView)
-        let scale = min(geometry.size.width / 400, geometry.size.height / 400)
+        // Check if the labels match
+        let itemLabel = match.items[itemIndex].label
+        let zoneLabel = match.zones[zoneIndex].label
         
-        // Adjust the drop position using the scale factor
-        let finalPosition = CGPoint(
-            x: (basePosition.x + offset.width) / scale,
-            y: (basePosition.y + offset.height) / scale
-        )
-        
-        // Reset hover state
-        isHoveringOverMatch = false
-        
-        // Check if the position matches a target zone
-        if let matchedZoneIndex = match.checkMatch(itemIndex: index, dragPosition: finalPosition) {
-            // Correct match - add a small delay to show the green color
+        if itemLabel == zoneLabel {
+            // Correct match
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     var updatedMatch = match
-                    updatedMatch.setMatched(itemIndex: index, zoneIndex: matchedZoneIndex)
+                    updatedMatch.setMatched(itemIndex: itemIndex, zoneIndex: zoneIndex)
                     match = updatedMatch
                     
                     // Show feedback for correct match
-                    feedbackText = match.zones[matchedZoneIndex].fact
+                    feedbackText = match.zones[zoneIndex].fact
                     isCorrectMatch = true
                     showFeedback = true
+                    
+                    // Reset selection
+                    selectedItem = nil
+                    highlightedZone = nil
                 }
             }
         } else {
-            // Incorrect match or no zone found - bounce back
+            // Incorrect match
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 bounceAnimation = true
-                showBounceHint = true
             }
             
-            // Reset position
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
-                    dragOffset = .zero
-                }
-                
-                // Show feedback for incorrect match
-                feedbackText = "Try again! Drag the label to the correct location on the volcano."
-                isCorrectMatch = false
-                showFeedback = true
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    bounceAnimation = false
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        showBounceHint = false
-                    }
-                }
+            // Show feedback for incorrect match
+            feedbackText = "Try again! Select the correct location for this label."
+            isCorrectMatch = false
+            showFeedback = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                bounceAnimation = false
             }
-        }
-        
-        // Reset dragging state
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            draggingItem = nil
-            dragOffset = .zero
         }
     }
 }
@@ -281,7 +253,8 @@ struct MatchTopBar: View {
 // Volcano diagram with target zones
 struct VolcanoDiagramView: View {
     let match: VolcanoMatch
-    let draggedItemPosition: CGPoint?
+    let highlightedZone: Int?
+    let onZoneTapped: (Int) -> Void
     
     // Helper to get image from various locations
     private func getMatchImage() -> UIImage? {
@@ -306,7 +279,7 @@ struct VolcanoDiagramView: View {
     }
     
     @ViewBuilder
-    private func zoneView(for zone: MatchZone, at position: CGPoint) -> some View {
+    private func zoneView(for zone: MatchZone, at position: CGPoint, isHighlighted: Bool) -> some View {
         if zone.isMatched {
             Text(zone.label)
                 .font(.system(size: 14, weight: .semibold))
@@ -320,9 +293,13 @@ struct VolcanoDiagramView: View {
                 .position(position)
         } else {
             Circle()
-                .strokeBorder(Color(hex: "#1D3557").opacity(0.6), lineWidth: 2)
+                .strokeBorder(isHighlighted ? Color(hex: "#E76F51") : Color(hex: "#1D3557").opacity(0.6), lineWidth: isHighlighted ? 3 : 2)
                 .frame(width: 36, height: 36)
+                .background(Circle().fill(Color.white.opacity(0.3)).frame(width: 34, height: 34))
                 .position(position)
+                .onTapGesture {
+                    onZoneTapped(match.zones.firstIndex(where: { $0.id == zone.id }) ?? 0)
+                }
         }
     }
     
@@ -375,8 +352,12 @@ struct VolcanoDiagramView: View {
                     
                     // Calculate raw position
                     let scaledPosition = calculateScaledPosition(for: zone, scale: scale, bounds: imageBounds)
-
-                    self.zoneView(for: zone, at: scaledPosition)
+                    
+                    self.zoneView(
+                        for: zone, 
+                        at: scaledPosition, 
+                        isHighlighted: highlightedZone == index
+                    )
                 }
             }
         }
@@ -384,10 +365,14 @@ struct VolcanoDiagramView: View {
     
     // Helper function to calculate scaled position with bounds checking
     private func calculateScaledPosition(for zone: MatchZone, scale: CGFloat, bounds: CGRect) -> CGPoint {
-        // Calculate raw position
+        // Calculate position based on the center of the image
+        let centerX = bounds.midX
+        let centerY = bounds.midY
+        
+        // Calculate position relative to the center, then scale
         var position = CGPoint(
-            x: zone.coordinates.x * scale,
-            y: zone.coordinates.y * scale
+            x: centerX + (zone.coordinates.x - 200) * scale, // 200 is the center X in the original design
+            y: centerY + (zone.coordinates.y - 200) * scale  // 200 is the center Y in the original design
         )
         
         // Clamp position to stay within image bounds
@@ -398,79 +383,38 @@ struct VolcanoDiagramView: View {
     }
 }
 
-// Draggable label component
-struct DraggableLabelView: View {
+// Clickable label component
+struct ClickableLabelView: View {
     let item: MatchItem
-    let isDragging: Bool
-    let isHoveringOverMatch: Bool
-    let dragOffset: CGSize
-    let onDragChanged: (CGSize) -> Void
-    let onDragEnded: (CGSize) -> Void
-    
-    // Animation states
-    @State private var pulseEffect: Bool = false
+    let isSelected: Bool
+    let onTap: () -> Void
     
     var body: some View {
-        Text(item.label)
-            .font(.system(size: 14, weight: .medium))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .foregroundColor(.white)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(backgroundColor)
-            )
-            .shadow(color: Color.black.opacity(isDragging ? 0.3 : 0.1),
-                    radius: isDragging ? 10 : 4,
-                    x: 0,
-                    y: isDragging ? 4 : 2)
-            .scaleEffect(scaleValue)
-            .offset(dragOffset)
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        if !item.isMatched {
-                            onDragChanged(value.translation)
-                        }
-                    }
-                    .onEnded { value in
-                        if !item.isMatched {
-                            onDragEnded(value.translation)
-                        }
-                    }
-            )
-            .onChange(of: isHoveringOverMatch) { oldValue, newValue in
-                if newValue {
-                    // Start pulse animation when hovering over match
-                    withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                        pulseEffect = true
-                    }
-                } else {
-                    // Stop pulse animation
-                    withAnimation {
-                        pulseEffect = false
-                    }
-                }
-            }
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isDragging)
-            .animation(.easeInOut(duration: 0.2), value: isHoveringOverMatch)
-    }
-    
-    // Scale value with pulse effect
-    private var scaleValue: CGFloat {
-        if isHoveringOverMatch {
-            return isDragging ? (pulseEffect ? 1.15 : 1.1) : 1.0
-        } else {
-            return isDragging ? 1.1 : 1.0
+        Button(action: onTap) {
+            Text(item.label)
+                .font(.system(size: 14, weight: .medium))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(backgroundColor)
+                )
+                .shadow(color: Color.black.opacity(isSelected ? 0.3 : 0.1),
+                        radius: isSelected ? 10 : 4,
+                        x: 0,
+                        y: isSelected ? 4 : 2)
+                .scaleEffect(isSelected ? 1.1 : 1.0)
         }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSelected)
     }
     
     // Background color logic
     private var backgroundColor: Color {
-        if isHoveringOverMatch {
-            return Color(hex: "#4CAF50") // Green for correct hover
-        } else if isDragging {
-            return Color(hex: "#E76F51") // Orange-red while dragging
+        if isSelected {
+            return Color(hex: "#E76F51") // Orange-red when selected
         } else {
             return Color(hex: "#2A9D8F") // Teal for default state
         }
