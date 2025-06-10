@@ -291,12 +291,20 @@ struct GreetingCardView: View {
 
 struct VolcanoHeaderView: View {
     let volcano: VolcanoProgressInfo
+    @State private var showInfoCards = false
     
     var body: some View {
         VStack(spacing: 12) {
-         
-            DashboardView.VolcanoLottieView(volcanoName: volcano.name)
-                .frame(width: 100, height: 100)
+            // Botón para mostrar las tarjetas como modal
+            Button(action: {
+                showInfoCards = true
+            }) {
+                DashboardView.VolcanoLottieView(volcanoName: volcano.name)
+                    .frame(width: 100, height: 100)
+            }
+            .sheet(isPresented: $showInfoCards) {
+                VolcanoInfoCardView(volcanoName: volcano.name)
+            }
             
             Text(volcano.name)
                 .font(.custom("SF Pro Text", size: 18).weight(.semibold))
