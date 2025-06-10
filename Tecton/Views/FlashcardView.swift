@@ -37,33 +37,41 @@ struct VolcanoInfoCardView: View {
                     completionView
                 } else {
                     // Contenido principal
-                    VStack(spacing: 0) {
+                    ZStack {
                         // Botón para cerrar la modal (posicionado absolutamente)
-                        HStack {
-                            Button(action: {
-                                presentationMode.wrappedValue.dismiss()
-                            }) {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(
-                                        Circle()
-                                            .fill(Color.black.opacity(0.3))
-                                    )
+                        VStack {
+                            HStack {
+                                Button(action: {
+                                    presentationMode.wrappedValue.dismiss()
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 20, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding(8)
+                                        .background(
+                                            Circle()
+                                                .fill(Color.black.opacity(0.3))
+                                        )
+                                }
+                                .padding(.leading, 20)
+                                .padding(.top, 10)
+                                
+                                Spacer()
                             }
-                            .padding(.leading, 20)
-                            .padding(.top, 10)
                             
                             Spacer()
                         }
-                        .zIndex(1)
+                        .zIndex(2)
                         
-                        // Contenedor principal centrado
-                        VStack(spacing: 20) {
-                            // Flecha animada
+                        // Contenedor centrado en la tarjeta
+                        VStack(spacing: 0) {
+                            // Espacio superior ajustable
+                            Spacer()
+                                .frame(height: geometry.size.height * 0.15)
+                            
+                            // Flecha animada (igual de gruesa pero menos abierta)
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 30))
+                                .font(.system(size: 40, weight: .bold))
                                 .foregroundColor(.white)
                                 .opacity(0.8)
                                 .shadow(radius: 2)
@@ -73,8 +81,9 @@ struct VolcanoInfoCardView: View {
                                         .repeatForever(autoreverses: true),
                                     value: UUID()
                                 )
+                                .padding(.bottom, 20)
                             
-                            // Tarjeta actual (centrada)
+                            // Tarjeta actual (centrada y más grande)
                             ZStack {
                                 ForEach(0..<deck.cards.count, id: \.self) { index in
                                     if index == currentIndex {
@@ -116,9 +125,12 @@ struct VolcanoInfoCardView: View {
                                     }
                                 }
                             }
-                            .frame(height: geometry.size.height * 0.5)
+                            .frame(height: geometry.size.height * 0.7) // Tarjetas aún más grandes
                             
-                            // Indicadores de progreso
+                            // Espacio flexible para empujar los indicadores hacia abajo
+                            Spacer()
+                            
+                            // Indicadores de progreso (anclados abajo)
                             HStack(spacing: 10) {
                                 ForEach(0..<deck.cards.count, id: \.self) { index in
                                     Circle()
@@ -126,9 +138,8 @@ struct VolcanoInfoCardView: View {
                                         .frame(width: 10, height: 10)
                                 }
                             }
+                            .padding(.bottom, 40) // Espacio en la parte inferior
                         }
-                        .padding(.top, -300) // Ajuste moderado hacia arriba
-                        .frame(maxHeight: .infinity, alignment: .center) // Centrar verticalmente
                     }
                 }
             }
@@ -142,7 +153,7 @@ struct VolcanoInfoCardView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .cornerRadius(20)
-            .padding(.horizontal)
+            .padding(.horizontal, 5) // Padding mínimo para maximizar tamaño
     }
     
     // Vista de finalización
