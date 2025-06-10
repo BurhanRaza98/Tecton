@@ -127,9 +127,8 @@ struct VolcanoInfoCardView: View {
                                 }
                             }
                         }
-                        .frame(maxHeight: .infinity)
-                        .padding(.top, 20) // Reducir el espacio superior
-                        .padding(.bottom, 20) // Reducir el espacio inferior
+                        .padding(.top, -300) // Ajuste moderado hacia arriba
+                        .frame(maxHeight: .infinity, alignment: .center) // Centrar verticalmente
                     }
                 }
             }
