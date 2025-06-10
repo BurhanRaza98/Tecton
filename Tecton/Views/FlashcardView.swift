@@ -34,7 +34,13 @@ struct VolcanoInfoCardView: View {
                 
                 if showCompletion {
                     // Vista de finalización
-                    completionView
+                    VStack {
+                        Spacer().frame(height: geometry.size.height * 0.2) // Reduce el espacio superior
+                        
+                        completionView
+                        
+                        Spacer() // Empuja el contenido hacia arriba
+                    }
                 } else {
                     // Contenido principal
                     ZStack {
@@ -165,31 +171,28 @@ struct VolcanoInfoCardView: View {
     
     // Vista de finalización
     private var completionView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.green)
+        VStack(spacing: 16) {
+            Text("You're ready!")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
             
-            Text("¡Listo para jugar!")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            Text("Ahora conoces los datos básicos sobre \(volcanoName). ¡Es hora de poner a prueba tus conocimientos en los mini-juegos!")
-                .font(.body)
+            Text("You can now play the mini-games.")
+                .font(.system(size: 20))
+                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
             
-            Text("Toca en cualquier lugar para continuar")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .padding(.top, 40)
+            Text("Tap here to continue")
+                .font(.system(size: 18))
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.top, 8)
         }
-        .padding()
+        .padding(.vertical, 30)
+        .padding(.horizontal, 40)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.9))
-                .shadow(radius: 10)
+                .fill(Color(hex: "#E76F51").opacity(0.9))
         )
+        .shadow(color: Color.black.opacity(0.2), radius: 10)
         .padding(30)
         .onTapGesture {
             presentationMode.wrappedValue.dismiss()
