@@ -85,45 +85,50 @@ struct VolcanoInfoCardView: View {
                             
                             // Tarjeta actual (centrada y más grande)
                             ZStack {
-                                ForEach(0..<deck.cards.count, id: \.self) { index in
-                                    if index == currentIndex {
-                                        cardView(for: deck.cards[index])
-                                            .offset(offset)
-                                            .rotationEffect(.degrees(Double(offset.width / 20)))
-                                            .gesture(
-                                                DragGesture()
-                                                    .onChanged { gesture in
-                                                        offset = gesture.translation
+                                // Mostrar la siguiente tarjeta parcialmente detrás de la actual
+                                if currentIndex < deck.cards.count - 1 {
+                                    cardView(for: deck.cards[currentIndex + 1])
+                                        .zIndex(0)
+                                }
+                                
+                                // Tarjeta actual
+                                cardView(for: deck.cards[currentIndex])
+                                    .offset(offset)
+                                    .rotationEffect(.degrees(Double(offset.width / 20)))
+                                    .zIndex(1)
+                                    .gesture(
+                                        DragGesture()
+                                            .onChanged { gesture in
+                                                offset = gesture.translation
+                                            }
+                                            .onEnded { gesture in
+                                                if abs(gesture.translation.width) > 100 {
+                                                    // Deslizamiento suficiente para cambiar de tarjeta
+                                                    withAnimation(.easeOut(duration: 0.3)) {
+                                                        offset = CGSize(
+                                                            width: gesture.translation.width > 0 ? 500 : -500,
+                                                            height: 0
+                                                        )
                                                     }
-                                                    .onEnded { gesture in
-                                                        if abs(gesture.translation.width) > 100 {
-                                                            // Deslizamiento suficiente para cambiar de tarjeta
-                                                            withAnimation {
-                                                                offset = CGSize(
-                                                                    width: gesture.translation.width > 0 ? 500 : -500,
-                                                                    height: 0
-                                                                )
-                                                            }
-                                                            
-                                                            // Cambiar a la siguiente tarjeta después de la animación
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                                                offset = .zero
-                                                                if currentIndex < deck.cards.count - 1 {
-                                                                    currentIndex += 1
-                                                                } else {
-                                                                    showCompletion = true
-                                                                }
-                                                            }
+                                                    
+                                                    // Cambiar a la siguiente tarjeta después de la animación
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                        // Preparar la siguiente tarjeta sin animación
+                                                        offset = .zero
+                                                        if currentIndex < deck.cards.count - 1 {
+                                                            currentIndex += 1
                                                         } else {
-                                                            // No deslizó lo suficiente, volver a la posición original
-                                                            withAnimation {
-                                                                offset = .zero
-                                                            }
+                                                            showCompletion = true
                                                         }
                                                     }
-                                            )
-                                    }
-                                }
+                                                } else {
+                                                    // No deslizó lo suficiente, volver a la posición original
+                                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                        offset = .zero
+                                                    }
+                                                }
+                                            }
+                                    )
                             }
                             .frame(height: geometry.size.height * 0.7) // Tarjetas aún más grandes
                             
