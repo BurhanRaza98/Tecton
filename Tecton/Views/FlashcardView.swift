@@ -33,14 +33,40 @@ struct VolcanoInfoCardView: View {
                     .opacity(0.8)
                 
                 if showCompletion {
-                    // Vista de finalización
-                    VStack {
-                        Spacer().frame(height: geometry.size.height * 0.2) // Reduce el espacio superior
+                    // Vista de finalización centrada
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: geometry.size.height * 0.15)
                         
-                        completionView
+                        // Mensaje de finalización
+                        VStack(spacing: 16) {
+                            Text("You're ready!")
+                                .font(.system(size: 32, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            Text("You can now play the mini-games.")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Tap here to continue")
+                                .font(.system(size: 18))
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.top, 8)
+                        }
+                        .padding(.vertical, 30)
+                        .padding(.horizontal, 40)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(hex: "#E76F51").opacity(0.9))
+                        )
+                        .shadow(color: Color.black.opacity(0.2), radius: 10)
+                        .onTapGesture {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                         
-                        Spacer() // Empuja el contenido hacia arriba
+                        Spacer()
                     }
+                    .frame(width: geometry.size.width)
                 } else {
                     // Contenido principal
                     ZStack {
@@ -88,6 +114,7 @@ struct VolcanoInfoCardView: View {
                                     value: UUID()
                                 )
                                 .padding(.bottom, 20)
+                                .frame(maxWidth: .infinity, alignment: .center) // Centrar la flecha
                             
                             // Tarjeta actual (centrada y más grande)
                             ZStack {
@@ -95,6 +122,7 @@ struct VolcanoInfoCardView: View {
                                 if currentIndex < deck.cards.count - 1 {
                                     cardView(for: deck.cards[currentIndex + 1])
                                         .zIndex(0)
+                                        .frame(maxWidth: .infinity, alignment: .center) // Centrar la tarjeta de fondo
                                 }
                                 
                                 // Tarjeta actual
@@ -102,6 +130,7 @@ struct VolcanoInfoCardView: View {
                                     .offset(offset)
                                     .rotationEffect(.degrees(Double(offset.width / 20)))
                                     .zIndex(1)
+                                    .frame(maxWidth: .infinity, alignment: .center) // Centrar la tarjeta actual
                                     .gesture(
                                         DragGesture()
                                             .onChanged { gesture in
@@ -137,6 +166,7 @@ struct VolcanoInfoCardView: View {
                                     )
                             }
                             .frame(height: geometry.size.height * 0.7) // Tarjetas aún más grandes
+                            .frame(maxWidth: .infinity, alignment: .center) // Centrar el ZStack de tarjetas
                             
                             // Espacio flexible para empujar los indicadores hacia abajo
                             Spacer()
@@ -149,10 +179,12 @@ struct VolcanoInfoCardView: View {
                                         .frame(width: 10, height: 10)
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .center) // Centrar los indicadores
                             .padding(.bottom, 320)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 10)
                         }
+                        .frame(width: geometry.size.width) // Asegurar que el VStack ocupe todo el ancho
                     }
                 }
             }
@@ -194,6 +226,7 @@ struct VolcanoInfoCardView: View {
         )
         .shadow(color: Color.black.opacity(0.2), radius: 10)
         .padding(30)
+        .frame(maxWidth: .infinity, alignment: .center) // Asegura centrado horizontal
         .onTapGesture {
             presentationMode.wrappedValue.dismiss()
         }
