@@ -114,7 +114,7 @@ struct VolcanoInfoCardView: View {
                                     value: UUID()
                                 )
                                 .padding(.bottom, 20)
-                                .frame(maxWidth: .infinity, alignment: .center) // Centrar la flecha
+                                .padding(.trailing, 5) // Compensación sutil de 5 puntos
                             
                             // Tarjeta actual (centrada y más grande)
                             ZStack {
@@ -122,7 +122,7 @@ struct VolcanoInfoCardView: View {
                                 if currentIndex < deck.cards.count - 1 {
                                     cardView(for: deck.cards[currentIndex + 1])
                                         .zIndex(0)
-                                        .frame(maxWidth: .infinity, alignment: .center) // Centrar la tarjeta de fondo
+                                        .padding(.trailing, 5) // Compensación sutil de 5 puntos
                                 }
                                 
                                 // Tarjeta actual
@@ -130,7 +130,7 @@ struct VolcanoInfoCardView: View {
                                     .offset(offset)
                                     .rotationEffect(.degrees(Double(offset.width / 20)))
                                     .zIndex(1)
-                                    .frame(maxWidth: .infinity, alignment: .center) // Centrar la tarjeta actual
+                                    .padding(.trailing, 5) // Compensación sutil de 5 puntos
                                     .gesture(
                                         DragGesture()
                                             .onChanged { gesture in
@@ -165,8 +165,8 @@ struct VolcanoInfoCardView: View {
                                             }
                                     )
                             }
-                            .frame(height: geometry.size.height * 0.7) // Tarjetas aún más grandes
-                            .frame(maxWidth: .infinity, alignment: .center) // Centrar el ZStack de tarjetas
+                            .frame(height: geometry.size.height * 0.7)
+                            .padding(.trailing, 5) // Compensación sutil de 5 puntos para el ZStack completo
                             
                             // Espacio flexible para empujar los indicadores hacia abajo
                             Spacer()
@@ -179,12 +179,13 @@ struct VolcanoInfoCardView: View {
                                         .frame(width: 10, height: 10)
                                 }
                             }
-                            .frame(maxWidth: .infinity, alignment: .center) // Centrar los indicadores
+                            .padding(.trailing, 5) // Compensación sutil de 5 puntos
                             .padding(.bottom, 320)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 10)
                         }
-                        .frame(width: geometry.size.width) // Asegurar que el VStack ocupe todo el ancho
+                        .frame(width: geometry.size.width)
+                        .padding(.trailing, 5) // Compensación sutil de 5 puntos para todo el contenedor
                     }
                 }
             }
