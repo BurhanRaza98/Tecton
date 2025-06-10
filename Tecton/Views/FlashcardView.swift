@@ -114,7 +114,7 @@ struct VolcanoInfoCardView: View {
                                     value: UUID()
                                 )
                                 .padding(.bottom, 20)
-                                .padding(.trailing, 5) // Compensación sutil de 5 puntos
+                                .padding(.trailing, 3) // Compensación de 3 puntos
                             
                             // Tarjeta actual (centrada y más grande)
                             ZStack {
@@ -122,7 +122,7 @@ struct VolcanoInfoCardView: View {
                                 if currentIndex < deck.cards.count - 1 {
                                     cardView(for: deck.cards[currentIndex + 1])
                                         .zIndex(0)
-                                        .padding(.trailing, 5) // Compensación sutil de 5 puntos
+                                        .padding(.trailing, 3) // Compensación de 3 puntos
                                 }
                                 
                                 // Tarjeta actual
@@ -130,7 +130,7 @@ struct VolcanoInfoCardView: View {
                                     .offset(offset)
                                     .rotationEffect(.degrees(Double(offset.width / 20)))
                                     .zIndex(1)
-                                    .padding(.trailing, 5) // Compensación sutil de 5 puntos
+                                    .padding(.trailing, 3) // Compensación de 3 puntos
                                     .gesture(
                                         DragGesture()
                                             .onChanged { gesture in
@@ -166,7 +166,7 @@ struct VolcanoInfoCardView: View {
                                     )
                             }
                             .frame(height: geometry.size.height * 0.7)
-                            .padding(.trailing, 5) // Compensación sutil de 5 puntos para el ZStack completo
+                            .padding(.trailing, 3) // Compensación de 3 puntos para el ZStack completo
                             
                             // Espacio flexible para empujar los indicadores hacia abajo
                             Spacer()
@@ -179,13 +179,13 @@ struct VolcanoInfoCardView: View {
                                         .frame(width: 10, height: 10)
                                 }
                             }
-                            .padding(.trailing, 5) // Compensación sutil de 5 puntos
+                            .padding(.trailing, 3) // Compensación de 3 puntos
                             .padding(.bottom, 320)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 10)
                         }
                         .frame(width: geometry.size.width)
-                        .padding(.trailing, 5) // Compensación sutil de 5 puntos para todo el contenedor
+                        .padding(.trailing, 3) // Compensación de 3 puntos para todo el contenedor
                     }
                 }
             }
