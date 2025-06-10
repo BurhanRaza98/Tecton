@@ -67,7 +67,7 @@ struct VolcanoInfoCardView: View {
                         VStack(spacing: 0) {
                             // Espacio superior ajustable
                             Spacer()
-                                .frame(height: geometry.size.height * 0.15)
+                                .frame(height: geometry.size.height * 0.1)
                             
                             // Flecha animada (igual de gruesa pero menos abierta)
                             Image(systemName: "chevron.down")
@@ -138,7 +138,9 @@ struct VolcanoInfoCardView: View {
                                         .frame(width: 10, height: 10)
                                 }
                             }
-                            .padding(.bottom, 40) // Espacio en la parte inferior
+                            .padding(.bottom, 320)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 10)
                         }
                     }
                 }
