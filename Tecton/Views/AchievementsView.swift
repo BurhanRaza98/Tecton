@@ -4,6 +4,7 @@ struct AchievementsView: View {
     @ObservedObject private var achievementManager = AchievementManager.shared
     @State private var selectedCategory: AchievementCategory = .all
     @State private var scrollOffset: CGFloat = 0
+    @State private var showSettings = false
     @Environment(\.dismiss) private var dismiss
     
     // Achievement categories
@@ -48,10 +49,17 @@ struct AchievementsView: View {
                     
                     Spacer()
                     
+                    // Título mejorado con mejor contraste
                     Text("Achievements")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color(hex: "#1D3557"))
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 24)
+                        .background(
+                            Capsule()
+                                .fill(Color(hex: "#F4A261").opacity(0.9))
+                                .shadow(color: Color.black.opacity(0.2), radius: 4, y: 2)
+                        )
                     
                     Spacer()
                     
@@ -89,11 +97,36 @@ struct AchievementsView: View {
                         .background(Color.white.opacity(0.1))
                         .cornerRadius(16)
                         .padding()
+                        
+                        // Settings button
+                        Button(action: {
+                            showSettings = true
+                        }) {
+                            HStack {
+                                Image(systemName: "gear")
+                                    .font(.system(size: 18))
+                                Text("Settings")
+                                    .font(.system(size: 18, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule()
+                                    .fill(Color(hex: "#F4A261").opacity(0.9))
+                                    .shadow(color: Color.black.opacity(0.2), radius: 4, y: 2)
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 30)
                     }
                 }
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
     }
     
     // Category picker for filtering achievements
