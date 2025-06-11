@@ -27,7 +27,7 @@ struct AchievementsView: View {
                 .scaledToFill()
                 .edgesIgnoringSafeArea(.all)
             
-            VStack(spacing: 0) {
+            VStack(spacing: 37) {
                 // Fixed header with X button
                 
                 Spacer(minLength: 60)
@@ -51,7 +51,7 @@ struct AchievementsView: View {
                     
                     // Título mejorado con mejor contraste
                     Text("Achievements")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 24)
@@ -118,7 +118,7 @@ struct AchievementsView: View {
                             )
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 30)
+                        .padding(.bottom, 145)
                     }
                 }
             }
