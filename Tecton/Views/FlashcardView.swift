@@ -191,6 +191,9 @@ struct VolcanoInfoCardView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+        .onAppear {
+            print("Cargando mazo para \(volcanoName) con \(deck.cards.count) tarjetas")
+        }
     }
     
     // Vista para una tarjeta individual

@@ -43,19 +43,32 @@ struct VolcanoFlashcardDeck {
         )
     }
     
-    // Placeholder para Mount St. Helens (a implementar después)
+    // Mount St. Helens deck con las imágenes correspondientes
     static var stHelensDeck: VolcanoFlashcardDeck {
         return VolcanoFlashcardDeck(
             volcanoName: "Mount St. Helens",
-            cards: []
+            cards: [
+                VolcanoFlashcard(image: "MS1"),
+                VolcanoFlashcard(image: "MS2"),
+                VolcanoFlashcard(image: "MS3"),
+                VolcanoFlashcard(image: "MS4"),
+                VolcanoFlashcard(image: "MS5"),
+                VolcanoFlashcard(image: "MS6")
+            ]
         )
     }
     
-    // Placeholder para Mount Fuji (a implementar después)
+    // Mount Fuji deck con las imágenes correspondientes
     static var fujiDeck: VolcanoFlashcardDeck {
         return VolcanoFlashcardDeck(
             volcanoName: "Mount Fuji",
-            cards: []
+            cards: [
+                VolcanoFlashcard(image: "MF1"),
+                VolcanoFlashcard(image: "MF2"),
+                VolcanoFlashcard(image: "MF3"),
+                VolcanoFlashcard(image: "MF4"),
+                VolcanoFlashcard(image: "MF5")
+            ]
         )
     }
 }
