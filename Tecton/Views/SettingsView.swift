@@ -3,8 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    @State private var notificationsEnabled = true
+    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
     @State private var showResetConfirmation = false
+    @ObservedObject private var achievementManager = AchievementManager.shared
     
     var body: some View {
         NavigationView {
@@ -32,6 +33,16 @@ struct SettingsView: View {
                         .padding()
                         .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : .white)
                         .cornerRadius(10)
+                        .onChange(of: notificationsEnabled) { _, newValue in
+                            // Save to UserDefaults
+                            UserDefaults.standard.set(newValue, forKey: "notificationsEnabled")
+                            
+                            // Update achievement manager
+                            if !newValue {
+                                // If notifications are disabled, clear any pending notifications
+                                achievementManager.newlyEarnedAchievement = nil
+                            }
+                        }
                     }
                     
                     // LEGAL section
@@ -85,6 +96,13 @@ struct SettingsView: View {
                     secondaryButton: .cancel()
                 )
             }
+            .onAppear {
+                // Set default value if not already set
+                if !UserDefaults.standard.contains(key: "notificationsEnabled") {
+                    UserDefaults.standard.set(true, forKey: "notificationsEnabled")
+                    notificationsEnabled = true
+                }
+            }
         }
     }
     
@@ -119,6 +137,13 @@ struct SettingsView: View {
             .padding(.vertical, 14)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// Extension to check if a key exists in UserDefaults
+extension UserDefaults {
+    func contains(key: String) -> Bool {
+        return object(forKey: key) != nil
     }
 }
 
