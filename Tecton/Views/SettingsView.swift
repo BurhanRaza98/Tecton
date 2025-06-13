@@ -124,7 +124,7 @@ struct SettingsView: View {
     }
     
     private func navigationLink(icon: String, iconColor: String, title: String) -> some View {
-        NavigationLink(destination: Text("Content for \(title)")) {
+        NavigationLink(destination: title == "Privacy Policy" ? AnyView(PrivacyPolicyView()) : AnyView(Text("Content for \(title)"))) {
             HStack {
                 Image(systemName: icon)
                     .foregroundColor(Color(hex: iconColor))
@@ -165,5 +165,80 @@ struct SettingsView_Previews: PreviewProvider {
             SettingsView()
                 .preferredColorScheme(.dark)
         }
+    }
+}
+
+// Add this new view for Privacy Policy
+struct PrivacyPolicyView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Last Updated: 09/June/2025")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+                
+                Text("Thank you for using Tecton! Your privacy is incredibly important to us. This Privacy Policy explains what information we collect, how we use it, and the choices you have about your information. Our goal is to be transparent and straightforward.")
+                
+                divider()
+                
+                sectionTitle("1. Information We Collect")
+                
+                Text("We designed Tecton to be a fun and private learning experience. We collect very limited information, and we do not collect any personally identifiable information (PII).")
+                    .padding(.bottom, 5)
+                
+                subsectionTitle("Information You Provide to Us")
+                Text("None. You are not required to create an account, and we do not ask for personal details like your name, email address, or location.")
+                
+                subsectionTitle("Information Collected Automatically")
+                Text("Game Progress Data: We anonymously track which mini-games you complete and which achievements you unlock.")
+                Text("How it's Stored: This information is stored only on your local device using standard iOS features (UserDefaults). It is not transmitted to us or any third party. This data is essential for the app to function, allowing you to save your progress and unlock new content.")
+                
+                // Additional sections...
+                divider()
+                
+                sectionTitle("2. How We Use Your Information")
+                Text("The non-personal information we collect is used solely to provide and improve your app experience. We use it to:")
+                bulletPoint("Save your progress so you can pick up where you left off.")
+                bulletPoint("Unlock new volcanoes and achievements as you complete challenges.")
+                bulletPoint("Understand which features are most popular to help us make the app better.")
+                
+                // Continue with remaining sections...
+            }
+            .padding()
+        }
+        .background(colorScheme == .dark ? Color.black : Color(hex: "#F5F5DC"))
+        .navigationBarTitle("Privacy Policy", displayMode: .inline)
+        // Removed the custom dismiss button only from this view
+    }
+    
+    private func divider() -> some View {
+        Rectangle()
+            .frame(height: 1)
+            .foregroundColor(Color.gray.opacity(0.3))
+            .padding(.vertical, 10)
+    }
+    
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 20, weight: .bold))
+            .padding(.bottom, 5)
+    }
+    
+    private func subsectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 16, weight: .semibold))
+            .padding(.bottom, 2)
+    }
+    
+    private func bulletPoint(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("•")
+                .font(.system(size: 16))
+            Text(text)
+                .font(.system(size: 16))
+        }
+        .padding(.leading, 5)
     }
 }
