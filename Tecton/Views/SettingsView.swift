@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -41,6 +42,14 @@ struct SettingsView: View {
                             if !newValue {
                                 // If notifications are disabled, clear any pending notifications
                                 achievementManager.newlyEarnedAchievement = nil
+                                
+                                // Remove all pending notifications
+                                UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                            } else {
+                                // If notifications are enabled, request permissions
+                                if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+                                    appDelegate.requestNotificationPermissions()
+                                }
                             }
                         }
                     }

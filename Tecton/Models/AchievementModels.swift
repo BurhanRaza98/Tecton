@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UserNotifications
 
 // Achievement badge model
 struct Achievement: Identifiable, Equatable {
@@ -256,6 +257,12 @@ class AchievementManager: ObservableObject {
     
     // Check for newly earned achievements
     func checkForNewAchievements() {
+        // Check if notifications are enabled
+        let notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        if !notificationsEnabled {
+            return // Skip checking if notifications are disabled
+        }
+        
         // Check each achievement
         for achievement in achievements {
             let isEarned = isAchievementEarned(achievement)
@@ -274,8 +281,35 @@ class AchievementManager: ObservableObject {
                 let notifiedStrings = notifiedAchievements.map { $0.uuidString }
                 UserDefaults.standard.set(notifiedStrings, forKey: "notifiedAchievements")
                 
+                // Send push notification
+                sendAchievementNotification(achievement)
+                
                 // Only notify about one achievement at a time
                 break
+            }
+        }
+    }
+    
+    // Send a push notification for an achievement
+    private func sendAchievementNotification(_ achievement: Achievement) {
+        let content = UNMutableNotificationContent()
+        content.title = "Achievement Unlocked!"
+        content.body = achievement.title
+        content.sound = UNNotificationSound.default
+        
+        // Add achievement ID to user info
+        content.userInfo = ["achievementId": achievement.id.uuidString]
+        
+        // Create a trigger (immediate)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        
+        // Create the request
+        let request = UNNotificationRequest(identifier: achievement.id.uuidString, content: content, trigger: trigger)
+        
+        // Add the request to the notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error sending notification: \(error.localizedDescription)")
             }
         }
     }
