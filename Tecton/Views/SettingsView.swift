@@ -128,7 +128,32 @@ struct SettingsView: View {
                     title: Text("Reset Progress"),
                     message: Text("Are you sure you want to reset all your progress? This action cannot be undone."),
                     primaryButton: .destructive(Text("Reset")) {
-                        // Add reset functionality here
+                        // Reset all progress
+                        ProgressManager.shared.resetAllProgress()
+                        
+                        // Reset notifications setting
+                        UserDefaults.standard.set(true, forKey: "notificationsEnabled")
+                        notificationsEnabled = true
+                        
+                        // Clear all UserDefaults (except the notifications setting we just set)
+                        let keys = UserDefaults.standard.dictionaryRepresentation().keys
+                        keys.forEach { key in
+                            if key != "notificationsEnabled" {
+                                UserDefaults.standard.removeObject(forKey: key)
+                            }
+                        }
+                        
+                        // Remove all pending notifications
+                        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                        
+                        // Reset achievement manager
+                        achievementManager.newlyEarnedAchievement = nil
+                        
+                        // Dismiss settings view and navigate to Dashboard
+                        dismiss()
+                        
+                        // Post notification to switch to Dashboard tab
+                        NotificationCenter.default.post(name: NSNotification.Name("SwitchToDashboardTab"), object: nil)
                     },
                     secondaryButton: .cancel()
                 )
@@ -564,7 +589,7 @@ struct DevelopersCreditsView: View {
                     developerCard(
                         name: "Syed Burhan Raza Gillani",
                         nameInNative: "سید برھان رضا گیلانی",
-                        role: "Coding"
+                        role: "Software Engineering"
                     )
                     
                     developerCard(
@@ -575,12 +600,12 @@ struct DevelopersCreditsView: View {
                     
                     developerCard(
                         name: "Otabek Eshpo'latov",
-                        role: "Coding"
+                        role: "Software Engineering"
                     )
                     
                     developerCard(
                         name: "Juan Daniel Rodríguez Oropeza",
-                        role: "Coding"
+                        role: "Software Engineering"
                     )
                     
                     developerCard(
@@ -591,7 +616,7 @@ struct DevelopersCreditsView: View {
                 }
                 .padding(.horizontal)
                 
-                Text("© 2024 Tecton Team. All rights reserved.")
+                Text("© 2025 Tecton Team. All rights reserved.")
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
                     .padding(.top, 20)
